@@ -1,11 +1,25 @@
-namespace checkout_kata_Test.Tests.Checkout
+namespace checkout_kata_KR.Application
 {
     public class CheckoutTests
     {
         [Fact]
         public void SKU_Valid_Input_Returns_Ok()
         {
+            var checkoutService = new CheckoutProcessor();
 
+            var testCheckoutList = new List<string>()
+            {
+                "A",
+                "B",
+                "C",
+                "D"
+            };
+
+            decimal endTotal = checkoutService.CalculateTotal(testCheckoutList);
+
+            decimal actualTotal = 230.00m;
+
+            Assert.Equal(endTotal, actualTotal);
         }
 
         [Fact]
