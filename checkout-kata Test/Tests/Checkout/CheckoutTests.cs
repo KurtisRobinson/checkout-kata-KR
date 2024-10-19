@@ -5,8 +5,6 @@ namespace checkout_kata_KR.Application
         [Fact]
         public void SKU_Valid_Input_Returns_Ok()
         {
-            var checkoutService = new CheckoutProcessor();
-
             var testCheckoutList = new List<string>()
             {
                 "A",
@@ -15,7 +13,9 @@ namespace checkout_kata_KR.Application
                 "D"
             };
 
-            decimal endTotal = checkoutService.CalculateTotal(testCheckoutList);
+            var checkoutService = new CheckoutProcessor(testCheckoutList);
+
+            decimal endTotal = checkoutService.GetTotalPrice();
 
             decimal actualTotal = 230.00m;
 

@@ -5,7 +5,6 @@
         // Take in user input as shopping cart items which are entered via SKU character.
         UserInputClass();
         // Check if entered has item has special offer, if threshold for offer has been met, apply discount.
-        CalculateSKUPrices();
         // Display total price at end of application.
     }
 
