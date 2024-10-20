@@ -20,12 +20,47 @@ namespace checkout_kata_KR.Application
             reciepts = GetUnitPrice(SKUs, checkoutList);
 
             // Apply discounts
-            //reciepts = CheckDiscounts(reciepts);
+            reciepts = CheckDiscounts(reciepts);
 
             // Display total price at end of application.
             var totalPrice = GetTotalPrice(reciepts);
 
             Console.WriteLine("Your total is £" + totalPrice);
+        }
+
+        private List<Reciept> CheckDiscounts(List<Reciept> reciepts)
+        {
+            // For each item, check if discount active and group together
+            List<Reciept> SortedList = reciepts.OrderBy(x => x.ItemName).ToList();
+            List<Reciept> OutputList = new List<Reciept>();
+            // If discount is active, check if threshold has been met and apply discount
+            foreach (var item in SortedList)
+            {
+                //Check if item has discount
+                if (item.SpecialPrice != String.Empty) 
+                {
+                    //Check if rule can be applied
+                    var discount = item.SpecialPrice;
+                    var split = discount.Split("for");
+                    int threshold = Int32.Parse(split[0]);
+                    var newPrice = Int32.Parse(split[1]);
+
+                    var discountGroup = SortedList.FindAll(x => x.ItemName == item.ItemName);
+
+                    if (discountGroup.Count >= threshold)
+                    {
+                        Console.WriteLine("Discount available");
+                        item.ItemPrice = newPrice;
+                        OutputList.Add(item);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Discount not available");
+                    }
+                }
+            }
+            //Remove exisitng entries and add new entry with discount
+            return OutputList;
         }
 
         private List<string> UserInputClass()
@@ -71,8 +106,7 @@ namespace checkout_kata_KR.Application
             {
                 totalPrice = totalPrice + item.ItemPrice;
             }
-            // Add up total unit price of items in reciept
-
+            
             return totalPrice;
         }
 
@@ -89,7 +123,8 @@ namespace checkout_kata_KR.Application
                         var recieptItem = new Reciept()
                         {
                             ItemName = item,
-                            ItemPrice = (int)Sku.UnitPrice
+                            ItemPrice = Sku.UnitPrice,
+                            SpecialPrice = Sku.SpecialPrice,
                         };
 
                         receipt.Add(recieptItem);
