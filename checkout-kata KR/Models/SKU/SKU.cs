@@ -6,4 +6,10 @@
        public float UnitPrice { get; set; }
        public string SpecialPrice { get; set; }
     }
+
+    public class Reciept() 
+    {
+        public string ItemName { get; set; }
+        public int ItemPrice { get; set; }
+    }
 }

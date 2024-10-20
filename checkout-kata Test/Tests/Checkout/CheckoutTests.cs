@@ -1,3 +1,5 @@
+using checkout_kata_KR.Models.SKU;
+
 namespace checkout_kata_KR.Application
 {
     public class CheckoutTests
@@ -13,11 +15,20 @@ namespace checkout_kata_KR.Application
                 "D"
             };
 
-            var checkoutService = new CheckoutProcessor(testCheckoutList);
+            SKU a = new SKU() { SkuName = "a", UnitPrice = 50, SpecialPrice = "3 for 150" };
+            SKU b = new SKU() { SkuName = "b", UnitPrice = 30, SpecialPrice = "2 for 45" };
+            SKU c = new SKU() { SkuName = "c", UnitPrice = 20, SpecialPrice = "" };
+            SKU d = new SKU() { SkuName = "d", UnitPrice = 15, SpecialPrice = "" };
 
-            decimal endTotal = checkoutService.GetTotalPrice();
+            List<SKU> SKUs = new List<SKU>() { a, b, c, d };
 
-            decimal actualTotal = 230.00m;
+            List<Reciept> reciepts = new List<Reciept>();
+
+            var checkoutService = new CheckoutProcessor();
+
+            var endTotal = checkoutService.GetTotalPrice(reciepts);
+
+            var actualTotal = 240.00m;
 
             Assert.Equal(endTotal, actualTotal);
         }
