@@ -26,6 +26,9 @@ namespace checkout_kata_KR.Application
 
             var checkoutService = new CheckoutProcessor();
 
+            // Gets stuck on Console.Readline();
+
+            Console.SetIn(new StringReader("done"));
             var endTotal = checkoutService.GetTotalPrice(reciepts);
 
             var actualTotal = 240.00m;
