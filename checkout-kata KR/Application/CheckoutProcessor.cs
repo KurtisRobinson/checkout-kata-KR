@@ -34,30 +34,42 @@ namespace checkout_kata_KR.Application
             List<Reciept> SortedList = reciepts.OrderBy(x => x.ItemName).ToList();
             List<Reciept> OutputList = new List<Reciept>();
             // If discount is active, check if threshold has been met and apply discount
-            foreach (var item in SortedList)
+
+            // Create discount groups and filter list into discount
+            var groupedList = SortedList.GroupBy(x => x.ItemName).Select(x => x.ToList()).ToList();
+
+
+            foreach (var group in groupedList)
             {
-                //Check if item has discount
-                if (item.SpecialPrice != String.Empty) 
+                //Check if item has meets threshold
+                var grpCount = group.Count();
+                var discount = group.First().SpecialPrice;
+                var item = group.First();
+
+                var split = discount.Split("for");
+                var threshold = Int32.Parse(split[0]);
+                var newPrice = Int32.Parse(split[1]);
+
+                if (grpCount >= threshold)
                 {
-                    //Check if rule can be applied
-                    var discount = item.SpecialPrice;
-                    var split = discount.Split("for");
-                    int threshold = Int32.Parse(split[0]);
-                    var newPrice = Int32.Parse(split[1]);
-
-                    var discountGroup = SortedList.FindAll(x => x.ItemName == item.ItemName);
-
-                    if (discountGroup.Count >= threshold)
-                    {
-                        Console.WriteLine("Discount available");
-                        item.ItemPrice = newPrice;
-                        OutputList.Add(item);
+                    Console.Write("Discount applicable");
+                    OutputList.Add(new Reciept 
+                    {  
+                      ItemName = item.ItemName,
+                      SpecialPrice = item.SpecialPrice,
+                      ItemPrice = newPrice,
                     }
-                    else
+                    );
+                }
+                else
+                {
+                    Console.WriteLine("Discount not applied");
+                    foreach(var items in group)
                     {
-                        Console.WriteLine("Discount not available");
+                        OutputList.Add((Reciept) items);
                     }
                 }
+                
             }
             //Remove exisitng entries and add new entry with discount
             return OutputList;
@@ -89,7 +101,7 @@ namespace checkout_kata_KR.Application
 
         private List<SKU> SetupInitialPrices()
         {
-            SKU a = new SKU() { SkuName = "a", UnitPrice = 50, SpecialPrice = "3 for 150" };
+            SKU a = new SKU() { SkuName = "a", UnitPrice = 50, SpecialPrice = "3 for 130" };
             SKU b = new SKU() { SkuName = "b", UnitPrice = 30, SpecialPrice = "2 for 45" };
             SKU c = new SKU() { SkuName = "c", UnitPrice = 20, SpecialPrice = "" };
             SKU d = new SKU() { SkuName = "d", UnitPrice = 15, SpecialPrice = "" };
