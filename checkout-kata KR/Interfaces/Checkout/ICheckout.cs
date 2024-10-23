@@ -2,6 +2,6 @@
 using checkout_kata_KR.Models.SKU;
 public interface ICheckout
     {
-        void Scan(string item);
+        List<string> Scan(List<string> checkoutList);
         decimal GetTotalPrice(List<Reciept> reciept);
     }
