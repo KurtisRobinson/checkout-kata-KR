@@ -1,51 +1,99 @@
-using checkout_kata_KR.Models.SKU;
+using checkout_kata_KR.Interfaces.SKU;
+using Moq;
+using System.Text;
 
 namespace checkout_kata_KR.Application
 {
     public class CheckoutTests
     {
+        private Mock<TextReader>? _ConsoleInput;
+        private StringBuilder? _ConsoleOutput;
+        private Mock<ICheckout>? _mockCheckout;
+
         [Fact]
-        public void SKU_Valid_Input_Returns_Ok()
+        public void SKU_ValidDiscount_Input_Returns_Ok()
         {
-            var testCheckoutList = new List<string>()
-            {
-                "A",
-                "B",
-                "C",
-                "D"
-            };
+            // Arrange
+            _ConsoleOutput = new StringBuilder();
+            var consoleOutputWriter = new StringWriter(_ConsoleOutput);
+            _ConsoleInput = new Mock<TextReader>();
+            Console.SetOut(consoleOutputWriter);
+            Console.SetIn(_ConsoleInput.Object);
+            SetupUserResponses("a", "a", "a", "done");
 
-            SKU a = new SKU() { SkuName = "a", UnitPrice = 50, SpecialPrice = "3 for 150" };
-            SKU b = new SKU() { SkuName = "b", UnitPrice = 30, SpecialPrice = "2 for 45" };
-            SKU c = new SKU() { SkuName = "c", UnitPrice = 20, SpecialPrice = "" };
-            SKU d = new SKU() { SkuName = "d", UnitPrice = 15, SpecialPrice = "" };
-
-            List<SKU> SKUs = new List<SKU>() { a, b, c, d };
-
-            List<Reciept> reciepts = new List<Reciept>();
-
+            // Act
             var checkoutService = new CheckoutProcessor();
 
-            // Gets stuck on Console.Readline();
-
-            Console.SetIn(new StringReader("done"));
-            var endTotal = checkoutService.GetTotalPrice(reciepts);
-
-            var actualTotal = 240.00m;
-
-            Assert.Equal(endTotal, actualTotal);
+            // Assert
+            var expectedTotal = 130.00m;
+            var response = GetConsoleOutput();
+            var totalItem = response[5].ToString();
+            var total = totalItem.Split('£');
+            var actualTotal = Decimal.Parse(total[1]);
+            Assert.Equal(expectedTotal, actualTotal);
         }
 
         [Fact]
-        public void SKU_InValid_Input_Returns_Bad()
+        public void SKU_InValidDiscount_Input_Returns_Ok()
         {
+            // Arrange
+            _ConsoleOutput = new StringBuilder();
+            var consoleOutputWriter = new StringWriter(_ConsoleOutput);
+            _ConsoleInput = new Mock<TextReader>();
+            Console.SetOut(consoleOutputWriter);
+            Console.SetIn(_ConsoleInput.Object);
+            SetupUserResponses("a", "b", "done");
 
+            // Act
+            var checkoutService = new CheckoutProcessor();
+
+            // Assert
+            var expectedTotal = 80.00m;
+            var response = GetConsoleOutput();
+            var totalItem = response[6].ToString();
+            var total = totalItem.Split('£');
+            var actualTotal = Decimal.Parse(total[1]);
+            Assert.Equal(expectedTotal, actualTotal);
         }
 
         [Fact]
-        public void SKU_Special_Input_Returns_Ok()
+        public void SKU_Invalid_Input_Returns_Bad()
         {
+            // Arrange
+            _ConsoleOutput = new StringBuilder();
+            var consoleOutputWriter = new StringWriter(_ConsoleOutput);
+            _ConsoleInput = new Mock<TextReader>();
+            Console.SetOut(consoleOutputWriter);
+            Console.SetIn(_ConsoleInput.Object);
+            SetupUserResponses("a", "a", "x", "done");
 
+            // Act
+            var checkoutService = new CheckoutProcessor();
+
+            // Assert
+            var expectedTotal = 100.00m;
+            var response = GetConsoleOutput();
+            var unknownItemText = response[5].ToString();
+            var totalItem = response[7].ToString();
+            var total = totalItem.Split('£');
+            var actualTotal = Decimal.Parse(total[1]);
+            Assert.Equal("Unknown item scanned, please wait for staff assistance.", unknownItemText);
+            Assert.Equal(expectedTotal, actualTotal);
+        }
+
+        private MockSequence SetupUserResponses(params string[] userResponse) 
+        { 
+            var sequence = new MockSequence();
+            foreach(var response in userResponse)
+            {
+                _ConsoleInput?.InSequence(sequence).Setup(x => x.ReadLine()).Returns(response); 
+            }
+            return sequence;
+        }
+
+        private string[]? GetConsoleOutput() 
+        { 
+            return _ConsoleOutput?.ToString().Split("\r\n");
         }
     }
 }

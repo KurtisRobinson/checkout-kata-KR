@@ -1,5 +1,6 @@
 ﻿using checkout_kata_KR.Interfaces.SKU;
 using checkout_kata_KR.Models.SKU;
+using System;
 
 namespace checkout_kata_KR.Application
 {
@@ -9,8 +10,7 @@ namespace checkout_kata_KR.Application
         {
             List<Reciept> reciepts = new List<Reciept>();
 
-            // Check if entered has item has special offer, if threshold for offer has been met, apply discount.
-            // Setup initial SKUs prices, to be amended later
+            // Setup initial SKUs prices
             var SKUs = SetupInitialPrices();
 
             // Take in user input as shopping cart items which are entered via SKU characters
@@ -30,18 +30,13 @@ namespace checkout_kata_KR.Application
 
         private List<Reciept> CheckDiscounts(List<Reciept> reciepts)
         {
-            // For each item, check if discount active and group together
             List<Reciept> SortedList = reciepts.OrderBy(x => x.ItemName).ToList();
             List<Reciept> OutputList = new List<Reciept>();
-            // If discount is active, check if threshold has been met and apply discount
 
-            // Create discount groups and filter list into discount
             var groupedList = SortedList.GroupBy(x => x.ItemName).Select(x => x.ToList()).ToList();
-
 
             foreach (var group in groupedList)
             {
-                //Check if item has meets threshold
                 var grpCount = group.Count();
                 var discount = group.First().SpecialPrice;
                 var item = group.First();
@@ -71,31 +66,15 @@ namespace checkout_kata_KR.Application
                 }
                 
             }
-            //Remove exisitng entries and add new entry with discount
             return OutputList;
         }
 
         private List<string> UserInputClass()
         {
             Console.WriteLine("Welcome to the Self-Checkout Service, please scan your items.");
-
-            var inProgess = true;
             var Checkoutlist = new List<string>();
+            Checkoutlist = Scan(Checkoutlist);
 
-            while (inProgess)
-            {
-                var item = Console.ReadLine();
-                if (item.Equals("done"))
-                {
-                    inProgess = false;
-                    Console.WriteLine("Please check your shopping total and proceed to payment");
-                }
-                else
-                {
-                    Checkoutlist.Add(item);
-                    Console.WriteLine("Please enter done to proceed to payment");
-                }
-            }
             return Checkoutlist;
         }
 
@@ -125,9 +104,14 @@ namespace checkout_kata_KR.Application
         public List<Reciept> GetUnitPrice(List<SKU> SKUs, List<string> CheckoutList)
         {
             List<Reciept> receipt = new List<Reciept>();
-            // For list of items, check if special discount can be applied
             foreach (var item in CheckoutList)
             {
+                // Check if item exists in SKU list
+                if (SKUs.Where(x => x.SkuName.Equals(item)).Count() < 1)
+                {
+                    Console.WriteLine("Unknown item scanned, please wait for staff assistance.");
+                }
+
                 foreach (var Sku in SKUs)
                 {
                     if (item.Equals(Sku.SkuName))
@@ -146,9 +130,24 @@ namespace checkout_kata_KR.Application
             return receipt;
         }
 
-        public void Scan(string item)
+        public List<string> Scan(List<string> checkoutList)
         {
-            // Scan in items, returned an ordered list so we can check number of same occurrences.
+            var inProgess = true;
+            while (inProgess)
+            {
+                var item = Console.ReadLine();
+                if (item.Equals("done"))
+                {
+                    inProgess = false;
+                    Console.WriteLine("Please check your shopping total and proceed to payment");
+                }
+                else
+                {
+                    checkoutList.Add(item);
+                    Console.WriteLine("Please enter done to proceed to payment");
+                }
+            }
+            return checkoutList;
         }
     }
 }
